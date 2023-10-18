@@ -38,6 +38,8 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation(files("C:\\Users\\dani_\\AndroidStudioProjects\\sPenStuff\\app\\libs\\sdk-v1.0.0.jar"))
     implementation(files("C:\\Users\\dani_\\AndroidStudioProjects\\sPenStuff\\app\\libs\\spenremote-v1.0.1.jar"))
+//    implementation("com.joaomgcd:taskerpluginlibrary:0.4.9")
+    implementation(files("C:\\Users\\dani_\\AndroidStudioProjects\\sPenStuff\\app\\libs\\taskerpluginlibrary-0.4.0.aar"))
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

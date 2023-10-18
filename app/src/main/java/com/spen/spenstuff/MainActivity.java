@@ -5,12 +5,20 @@ import static java.security.AccessController.getContext;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.util.Log;
+import android.widget.ImageView;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.Typeface;
 
 import com.samsung.android.sdk.penremote.AirMotionEvent;
 import com.samsung.android.sdk.penremote.ButtonEvent;
@@ -21,24 +29,32 @@ import com.samsung.android.sdk.penremote.SpenUnit;
 import com.samsung.android.sdk.penremote.SpenUnitManager;
 
 import java.lang.reflect.Constructor;
+import java.security.spec.PSSParameterSpec;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "SpenRemoteSample";
     private TextView mButtonState;
     private TextView mAirMotion;
+    private TextView testField;
 
     private Button mConnectButton;
     private Button mMotionButton;
     private SpenRemote mSpenRemote;
     private SpenUnitManager mSpenUnitManager;
     private boolean mIsMotionListening = false;
-
+    private float posX = 300;
+    private float posY = 200;
+    private ImageView drawingImageView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         mButtonState = findViewById(R.id.buttonState);
         mAirMotion = findViewById(R.id.AirView);
+        testField = findViewById(R.id.testField);
+
+        drawingImageView = (ImageView) findViewById(R.id.DrawingImageView);
 
         mSpenRemote = SpenRemote.getInstance();
         mSpenRemote.setConnectionStateChangeListener(new SpenRemote.ConnectionStateChangeListener() {
@@ -149,6 +165,12 @@ public class MainActivity extends AppCompatActivity {
 
             if (button.getAction() == ButtonEvent.ACTION_DOWN) {
                 mButtonState.setText("BUTTON : Pressed");
+                drawingImageView.setX(300);
+                drawingImageView.setY(200);
+                posX = 300;
+                posY = 200;
+                Log.v("Cathable", "NoCatch");
+
             } else if (button.getAction() == ButtonEvent.ACTION_UP) {
                 mButtonState.setText("BUTTON : Released");
             }
@@ -162,6 +184,10 @@ public class MainActivity extends AppCompatActivity {
             float deltaX = airMotion.getDeltaX();
             float deltaY = airMotion.getDeltaY();
             mAirMotion.setText("" + deltaX + ", " + deltaY);
+            posX += deltaX*25;
+            posY -= deltaY*25;
+            drawingImageView.setX(posX);
+            drawingImageView.setY(posY);
         }
     };
 }
