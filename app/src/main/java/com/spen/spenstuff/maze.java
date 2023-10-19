@@ -1,26 +1,13 @@
 package com.spen.spenstuff;
 
-import static java.security.AccessController.getContext;
-
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.graphics.Interpolator;
-import android.media.Image;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
-import android.util.Log;
 import android.widget.ImageView;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.Typeface;
+import android.widget.Toast;
 
 import com.samsung.android.sdk.penremote.AirMotionEvent;
 import com.samsung.android.sdk.penremote.ButtonEvent;
@@ -30,43 +17,37 @@ import com.samsung.android.sdk.penremote.SpenRemote;
 import com.samsung.android.sdk.penremote.SpenUnit;
 import com.samsung.android.sdk.penremote.SpenUnitManager;
 
-import java.lang.reflect.Constructor;
-import java.security.spec.PSSParameterSpec;
+public class maze extends AppCompatActivity {
 
-public class MainActivity extends AppCompatActivity {
-    private static final String TAG = "SpenRemoteSample";
-    private TextView mButtonState;
-    private TextView mAirMotion;
-    private TextView testField;
-
+    public ImageView drawingImageView;
     private Button mConnectButton;
     private Button mMotionButton;
     private SpenRemote mSpenRemote;
     private SpenUnitManager mSpenUnitManager;
     private boolean mIsMotionListening = false;
+    private boolean buttonUp = true;
+    private static final String TAG = "SpenRemoteSample";
     private float posX = 300;
     private float posY = 200;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_maze);
+        configureBackBtn();
 
+        drawingImageView = (ImageView) findViewById(R.id.Player);
 
-        mButtonState = findViewById(R.id.buttonState);
-        mAirMotion = findViewById(R.id.AirView);
-        testField = findViewById(R.id.testField);
-
-
+        mMotionButton = findViewById(R.id.ConnectMaze);
         mSpenRemote = SpenRemote.getInstance();
         mSpenRemote.setConnectionStateChangeListener(new SpenRemote.ConnectionStateChangeListener() {
             @Override
             public void onChange(int i) {
-                Toast.makeText(MainActivity.this, "Connection State = " + i, Toast.LENGTH_SHORT).show();
+                Toast.makeText(maze.this, "Connection State = " + i, Toast.LENGTH_SHORT).show();
             }
         });
         checkSdkInfo();
 
-        mConnectButton = findViewById(R.id.Connect);
+        mConnectButton = findViewById(R.id.ConnectMaze);
         mConnectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -81,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        mMotionButton = findViewById(R.id.getData);
+        mMotionButton = findViewById(R.id.getDataMaze);
         mMotionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -102,19 +83,16 @@ public class MainActivity extends AppCompatActivity {
                 mIsMotionListening = !mIsMotionListening;
             }
         });
-        configureNextBtn();
-    }//end OnCreate
-
-    private void configureNextBtn(){
-        Button nextBtn = (Button) findViewById(R.id.MazeBtn);
-        nextBtn.setOnClickListener(new View.OnClickListener(){
+    }// end of onCreate
+    private void configureBackBtn(){
+        Button backBtn = (Button) findViewById(R.id.backBtn);
+        backBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                startActivity(new Intent(MainActivity.this, maze.class));
+                finish();
             }
         });
     }
-
     private void checkSdkInfo() {
         Log.d(TAG, "VersionCode=" + mSpenRemote.getVersionCode());
         Log.d(TAG, "versionName=" + mSpenRemote.getVersionName());
@@ -136,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
             public void onChange(int state) {
                 if (state == SpenRemote.State.DISCONNECTED
                         || state == SpenRemote.State.DISCONNECTED_BY_UNKNOWN_REASON) {
-                    Toast.makeText(MainActivity.this, "Disconnected : " + state, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(maze.this, "Disconnected : " + state, Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -156,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onSuccess(SpenUnitManager spenUnitManager) {
             Log.d(TAG, "onConnected");
-            Toast.makeText(MainActivity.this, "Connected", Toast.LENGTH_SHORT).show();
+            Toast.makeText(maze.this, "Connected", Toast.LENGTH_SHORT).show();
             mSpenUnitManager = spenUnitManager;
 
             SpenUnit buttonUnit = mSpenUnitManager.getUnit(SpenUnit.TYPE_BUTTON);
@@ -166,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onFailure(int i) {
             Log.d(TAG, "onFailure");
-            Toast.makeText(MainActivity.this, "Disconnected", Toast.LENGTH_SHORT).show();
+            Toast.makeText(maze.this, "Disconnected", Toast.LENGTH_SHORT).show();
         }
     };
 
@@ -176,15 +154,15 @@ public class MainActivity extends AppCompatActivity {
             ButtonEvent button = new ButtonEvent(event);
 
             if (button.getAction() == ButtonEvent.ACTION_DOWN) {
-                mButtonState.setText("BUTTON : Pressed");
 //                drawingImageView.setX(300);
 //                drawingImageView.setY(200);
-                posX = 300;
-                posY = 200;
-                Log.v("Cathable", "NoCatch");
-
-            } else if (button.getAction() == ButtonEvent.ACTION_UP) {
-                mButtonState.setText("BUTTON : Released");
+//                posX = 300;
+//                posY = 200;
+//                Log.v("Cathable", "NoCatch");
+                buttonUp = true;
+            }
+            else if (button.getAction() == ButtonEvent.ACTION_UP) {
+                buttonUp = false;
             }
         }
     };
@@ -195,11 +173,14 @@ public class MainActivity extends AppCompatActivity {
             AirMotionEvent airMotion = new AirMotionEvent(event);
             float deltaX = airMotion.getDeltaX();
             float deltaY = airMotion.getDeltaY();
-            mAirMotion.setText("" + deltaX + ", " + deltaY);
-//            posX += deltaX*25;
-//            posY -= deltaY*25;
-//            drawingImageView.setX(posX);
-//            drawingImageView.setY(posY);
+            if(!buttonUp){
+                posX += deltaX*150;
+                posY -= deltaY*150;
+                drawingImageView.setX(posX);
+                drawingImageView.setY(posY);
+            }
+
+
         }
     };
 }
